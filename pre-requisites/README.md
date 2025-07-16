@@ -1,4 +1,4 @@
-## 🔧 Prerequisites for Running vLLM Auto-Benchmarking on a GPU VM (A100)
+## Prerequisites for Running vLLM Auto-Benchmarking on a GPU VM (A100)
 
 Deploying and benchmarking open-source LLMs such as **Mistral**, **LLaMA**, and **Phi-3** using [vLLM](https://github.com/vllm-project/vllm) requires a properly prepared environment. This article outlines all the essential **system**, **GPU**, and **Python dependencies** to get started — especially on cloud VMs like **Open Telekom Cloud (OTC)** with A100 GPUs.
 
