@@ -25,3 +25,6 @@ echo "Then run: docker run --rm --gpus all nvidia/cuda:12.2.0-base-ubuntu22.04 n
 sleep 3
 sudo reboot
 
+# Check with Docker
+# docker run --rm --gpus all nvidia/cuda:12.2.0-base-ubuntu22.04 nvidia-smi
+
