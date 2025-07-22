@@ -2,9 +2,18 @@
 
 # List of HuggingFace model IDs to benchmark
 MODELS=(
-  "NousResearch/Hermes-3-Llama-3.1-8B"
-  "facebook/opt-1.3b"
+  #"facebook/opt-1.3b"
+  #"NousResearch/Hermes-3-Llama-3.1-8B"
+  #"openGPT-X/Teuken-7B-instruct-research-v0.4"
   "mistralai/Mistral-7B-Instruct-v0.2"
+  "deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct"
+  "Qwen/Qwen3-30B-A3B-FP8"
+  "Qwen/Qwen2.5-Coder-32B-Instruct"
+  #"mistralai/Mistral-Small-24B-Instruct-2501"
+  #"mistralai/Mixtral-8x7B-Instruct-v0.1"
+  #"deepseek-ai/DeepSeek-R1-Distill-Llama-70B"
+  #"meta-llama/Llama-3.3-70B-Instruct"
+  #"Qwen/Qwen2.5-VL-72B-Instruct"
 )
 
 # Benchmark settings
@@ -13,6 +22,7 @@ DATASET_URL="https://huggingface.co/datasets/anon8231489123/ShareGPT_Vicuna_unfi
 DATASET_FILE="ShareGPT_V3_unfiltered_cleaned_split.json"
 HOST_CACHE="$HOME/.cache/huggingface"
 VLLM_VERSION="v0.9.2"
+DATE=$(date +'%d%m%Y%H%M%S')
 
 # Pull vLLM Docker image
 docker pull vllm/vllm-openai:$VLLM_VERSION
@@ -47,14 +57,24 @@ for MODEL in "${MODELS[@]}"; do
 
   echo "Launching model $MODEL on port $PORT..."
 
+  #docker run -d --rm --runtime=nvidia --gpus all \
+  #  -v "$HOST_CACHE:/root/.cache/huggingface" \
+  #  -v "$(pwd):/app" \
+  #  -p "$PORT:8000" \
+  #  --ipc=host \
+  #  --name "$CONTAINER_NAME" \
+  #  vllm/vllm-openai:$VLLM_VERSION \
+  #  --model "$MODEL"
+
   docker run -d --rm --runtime=nvidia --gpus all \
-    -v "$HOST_CACHE:/root/.cache/huggingface" \
-    -v "$(pwd):/app" \
-    -p "$PORT:8000" \
-    --ipc=host \
-    --name "$CONTAINER_NAME" \
-    vllm/vllm-openai:$VLLM_VERSION \
-    --model "$MODEL"
+     -v "$HOST_CACHE:/root/.cache/huggingface" \
+     -v "$(pwd):/app" \
+     -p "$PORT:8000" \
+     --ipc=host \
+     --name "$CONTAINER_NAME" \
+     vllm/vllm-openai:$VLLM_VERSION \
+     --model "$MODEL" \
+     --trust-remote-code
 
   echo "Waiting for model to be ready..."
   until curl -s "http://localhost:$PORT/v1/models" >/dev/null; do
@@ -68,6 +88,7 @@ for MODEL in "${MODELS[@]}"; do
     python3 /vllm-workspace/benchmarks/benchmark_serving.py \
       --backend vllm \
       --model \"$MODEL\" \
+      --trust-remote-code \
       --endpoint /v1/completions \
       --dataset-name sharegpt \
       --dataset-path /app/$DATASET_FILE \
@@ -111,7 +132,7 @@ python3 <<EOF
 import mlflow
 
 mlflow.set_tracking_uri("file:./mlruns")
-mlflow.set_experiment("vLLM Benchmarks-${VLLM_VERSION}")
+mlflow.set_experiment("vLLM Benchmarks-${VLLM_VERSION}-${DATE}")
 
 latency = float("${LATENCY:-1}")
 throughput = float("${THROUGHPUT:-1}")
