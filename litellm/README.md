@@ -136,5 +136,13 @@ curl http://localhost:4000/v1/chat/completions \
 
 ## Output for reference
 
-
-Do you want me to do that?
+```bash
+prayag@litellm-lab:~$ curl http://localhost:4000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "llama2",
+    "messages": [{"role": "user", "content": "Hello from custom LiteLLM image"}]
+  }'
+{"id":"chatcmpl-fa6ac6fc-2c42-4741-bc1c-9cc40c15cb30","created":1758267894,"model":"ollama/llama2","object":"chat.completion","choices":[{"finish_reason":"stop","index":0,"message":{"content":" Nice to meet you! I'm just an AI model, I don't have personal experiences or emotions like humans do. However, I'm here to help you with any questions or tasks you may have. How can I assist you today?","role":"assistant"}}],"usage":{"completion_tokens":54,"prompt_tokens":35,"total_tokens":89}}
+prayag@litellm-lab:~$
+```
